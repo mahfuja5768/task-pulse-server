@@ -88,6 +88,72 @@ async function run() {
       }
     });
 
+    //get a task
+    app.get("/tasks/:id", verifyToken, async (req, res) => {
+      try {
+        const id = req.params.id;
+        const query = { _id: new ObjectId(id) };
+        const result = await taskCollection.find(query).toArray();
+        res.send(result);
+      } catch (error) {
+        console.log(error);
+      }
+    });
+
+    //update a task
+    app.patch("/update-task/:id", verifyToken, async (req, res) => {
+      try {
+        const id = req.params.id;
+        const task = req.body;
+        const filter = { _id: new ObjectId(id) };
+        const updatedDoc = {
+          $set: {
+            title: task.title,
+            description: task.description,
+            deadline: task.deadline,
+            priority: task.priority,
+          },
+        };
+        console.log(updatedDoc);
+        const result = await taskCollection.updateOne(filter, updatedDoc);
+        console.log(result);
+        res.send(result);
+      } catch (error) {
+        console.log(error);
+      }
+    });
+
+    //update a task status
+    app.put("/update-status/:id", verifyToken, async (req, res) => {
+      try {
+        const id = req.params.id;
+        const filter = { _id: new ObjectId(id) };
+        const { status } = req.body;
+        console.log(status);
+        const updatedDoc = {
+          $set: {
+            status: status,
+          },
+        };
+        const result = await taskCollection.updateOne(filter, updatedDoc);
+        res.send(result);
+      } catch (error) {
+        console.log(error);
+      }
+    });
+
+    //delete reviews
+    app.delete("/tasks/:id", verifyToken, async (req, res) => {
+      try {
+        const id = req.params.id;
+        const query = { _id: new ObjectId(id) };
+        const result = await taskCollection.deleteOne(query);
+        res.send(result);
+      } catch (error) {
+        console.log(error);
+      }
+    });
+
     // Send a ping to confirm a successful connection
     // await client.db("admin").command({ ping: 1 });
     // console.log(
