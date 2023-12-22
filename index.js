@@ -5,7 +5,7 @@ const jwt = require("jsonwebtoken");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const app = express();
 
-const port = process.env.PORT || 8000;
+const port = process.env.PORT || 5000;
 
 app.use(cors());
 app.use(express.json());
@@ -85,6 +85,29 @@ async function run() {
         res.send(result);
       } catch (error) {
         console.log(error);
+      }
+    });
+
+    //get notification
+    app.get("/notification", verifyToken, async (req, res) => {
+      try {
+        let query = {};
+        if (req.query?.email) {
+          query = { email: req.query.email };
+        }
+
+        const tasks = await taskCollection.find(query).toArray();
+
+        const sortedTasks = tasks.sort(
+          (a, b) => new Date(b.deadline) - new Date(a.deadline)
+        );
+
+        const mostRecentTask = sortedTasks[0];
+
+        res.send({ mostRecentTask });
+      } catch (error) {
+        console.log(error);
+        res.status(500).send({ error: "Internal Server Error" });
       }
     });
 
